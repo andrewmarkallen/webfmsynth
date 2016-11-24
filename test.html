@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html>
+
+<script src="test_packages/jquery-3.1.1.min.js"></script>
+<script src ="src/FMsynth/FMsynth.js"></script>
+<script src ="src/FMsynth/notemap.js"></script>
+<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>
+<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="styles/style.css">
+<!-- Latest compiled and minified CSS -->
+
+
+<body>	
+	<div id="header"></div>
+	<div id="synths"></div>
+	<div id="controls"></div>
+	<div id="keyboard"></div>
+
+	<script type="text/babel">
+
+	var header = document.querySelector("#header");
+	var synths = document.querySelector("#synths");
+	var controls = document.querySelector("#controls");
+	var keyboard = document.querySelector("#keyboard");
+
+	var Oscillator = React.createClass({
+
+		changeParameter: function(e)
+		{
+			synth.changeOpParameter(this.props.index, e.target.id, e.target.value);
+			console.log(e.target.id + ": " + e.target.value);
+		},
+
+		render: function()
+		{
+			return(
+			<div className = "Oscillator">
+				<Slider name="Gain:" id="gain" min="0" max="50" step="0.01" value="0.5" clickHandler={this.changeParameter} />
+				<Slider name="Frequency:" id="freq" min="0" max="2000" step="1" value="440" clickHandler={this.changeParameter}/>
+				<Slider name="Attack:" id="a" min="0" max="5" step="0.01" value="1" clickHandler={this.changeParameter} />
+				<Slider name="Decay:" id="d" min="0" max="5" step="0.01" value="1" clickHandler={this.changeParameter} />
+				<Slider name="Sustain:" id="s" min="0" max="5" step="0.01" value="1" clickHandler={this.changeParameter} />
+				<Slider name="Release:" id="r" min="0" max="5" step="0.01" value="1" clickHandler={this.changeParameter} />
+			</div>
+			);
+		}
+	});
+
+	var SynthControls = React.createClass({
+		
+		changeParameter: function(e)
+		{
+			console.log(e.target.id + ": " + e.target.value);
+			synth.changeParameter(e.target.id, e.target.value);
+		},
+
+		render: function()
+		{
+			return(
+			<div className="SynthControls">
+				<Slider name="Gain:" id="gain" min="0" max="1" step="0.0001" value="0.5" clickHandler={this.changeParameter} />
+			</div>
+			);
+		}
+	});
+
+	var Slider = React.createClass({
+
+		render: function()
+		{
+			return(
+			<div className="Slider">{this.props.name}<input 
+			id={this.props.id}
+			type="range"
+			min={this.props.min}
+			max={this.props.max}
+			step={this.props.step}
+			defaultValue={this.props.value}
+			onChange={this.props.clickHandler}
+			/>
+			 </div>
+
+			);
+		}
+	});
+
+	var Keyboard = React.createClass({
+
+		eventListener: function(e)
+		{
+			console.log("event fired!");
+		},
+
+		render: function()
+		{
+			return(
+			<div className="Keyboard">
+				<Key note="C4"/>
+				<Key note="D4"/>
+				<Key note="E4"/>
+			</div>
+			);
+		}
+	});
+
+	var Key = React.createClass({
+		
+
+
+		noteOn: function()
+		{
+			console.log("note On");
+			synth.changeOpParameter(0,"freq",noteMap[this.props.note]);
+			synth.changeOpParameter(1,"freq",noteMap[this.props.note]);
+
+			synth.noteOn();
+		},
+
+		noteOff: function()
+		{
+			synth.noteOff();
+			console.log("note Off");
+		},
+
+		render: function()
+		{
+			return(
+				<button onMouseDown={this.noteOn} 
+						onMouseUp={this.noteOff}
+				className ="note">{this.props.note}</button>
+			);
+		}
+	});
+
+
+	var Counter = React.createClass({
+		render: function(){
+		var textStyle ={
+			fontSize: 72,
+			fontFamily: "sans-serif",
+			color: "#333",
+			fontweight: "bold"
+		};
+
+		return(
+			<div style={textStyle}>
+				{this.props.display}
+			</div>
+		);
+		}
+
+	});
+
+	var CounterParent = React.createClass({
+		getInitialState: function(){
+			return{
+				count: 0
+			};
+		},	
+
+		increase: function(e)
+		{
+			var currentCount = this.state.count;
+			if(e.shiftKey)
+			{
+				currentCount +=10;
+			}
+			else
+			{
+				currentCount +=1;
+			}
+			this.setState({
+			count: currentCount
+			});
+		},
+
+		render: function(){
+			var backgroundStyle ={
+				padding:50,
+				backgroundColor: "#FFC53A",
+				width: 250,
+				height: 100,
+				borderRadius: 10,
+				textAlign: "center"
+			};
+
+			var buttonStyle = {
+				fontSize: "1em",
+				width: 30,
+				height: 30,
+				fontFamily: "sans-serif",
+				color: "#333",
+				fontWeight: "bold",
+				lineHeight: "3px",
+			};
+
+			return(
+				<div style={backgroundStyle}>
+					<Counter display={this.state.count}/>
+					<button onClick={this.increase} style={buttonStyle}>+</button>
+				</div>
+			);
+		}
+	});
+
+	var HelloWorld = React.createClass({
+		render: function(){
+			return(
+			<p>Hello, {this.props.greetTarget}!</p>
+			);
+		}
+	});
+
+	ReactDOM.render(
+	<div>
+		<div>
+			<HelloWorld greetTarget="Mark"/>
+			<HelloWorld greetTarget="Allen"/>
+		</div>
+
+		<div>
+			<CounterParent/>
+		</div>
+	</div>,
+	header
+	);
+
+	ReactDOM.render(
+	<div>
+		<Oscillator index="0"/>
+		<Oscillator index="1"/>
+	</div>,
+	synths
+	);
+
+	ReactDOM.render(
+	<div>
+		<SynthControls/>
+	</div>,
+	controls
+	);
+
+	ReactDOM.render(
+	<div>
+		<Keyboard/>
+	</div>,
+	keyboard
+	);
+	</script>
+
+<div>
+
+VCO Frequency: <input id="frequency" type="range" min = "0" max="1000" step="1" value = "440"
+onchange = "synth.changeFrequency(this.value);">
+</div>
+<div>
+LP Frequency: <input id="frequency" type="range" min = "0" max="1000" step="1" value = "440"
+onchange = "synth.changeFilterFrequency(this.value);">
+</div>
+<!-- Gain: <input id="gain" type="range" min = "0" max="1" step="0.01" value = "0.5"
+onchange = "synth.changeGain(this.value);">
+</div>-->
+<!-- Gain: <input id="gain" type="range" min = "0" max="1" step="0.01" value = "0.5"
+onchange = "synth.changeGain(this.value);">
+</div>-->
+
+<div>
+<button onclick="synth.start();">Start</button>
+</div>
+<div>
+<button onclick="synth.stop();">Stop</button>
+</div>
+<div>
+<button onclick="synth.trigger();">Trigger Envelopes</button>
+</div>
+</body>
+</html>
+
