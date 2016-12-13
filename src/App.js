@@ -4,6 +4,7 @@ import Grid from 'react-bootstrap/lib/Grid'
 import Row from 'react-bootstrap/lib/Row'
 import Col from 'react-bootstrap/lib/Col'
 import 'bootstrap/less/bootstrap.less';
+import Visualiser from './visualisation/visualiser.js'
 //import Navbar from 'react-bootstrap/lib/Navbar';
 
 var header = document.querySelector("#header");
@@ -11,7 +12,32 @@ var synths = document.querySelector("#synths");
 var controls = document.querySelector("#controls");
 var keyboard = document.querySelector("#keyboard");
 var app = document.querySelector("#app");
+var visualiser = document.querySelector("#visualiser");
 
+var vis; 
+
+var VisualiserComponent = React.createClass({
+
+	toggleMode: function(e)
+	{
+		vis.draw();
+	},
+
+	visualise: function(e)
+	{
+		vis = new Visualiser(synth);
+	},
+
+	render: function()
+	{
+		return(
+			<div className = "VisualiserComponent">
+				<button onClick={this.toggleMode}>Toggle</button>
+				<button onClick={this.visualise}>Visualise</button>
+			</div>
+			);
+	}
+});
 
 var Oscillator = React.createClass({
 
@@ -126,16 +152,19 @@ var Key = React.createClass({
 ReactDOM.render(<Keyboard></Keyboard>, keyboard);
 ReactDOM.render(<SynthControls></SynthControls>, controls);
 ReactDOM.render(
-	<Grid>
-	<Row className="show-grid">
-		<Col xs={6} md={2}><Oscillator index="0"/></Col>
-		<Col xs={6} md={2}><Oscillator index="1"/></Col>
-		<Col xs={6} md={2}><Oscillator index="2"/></Col>
-		<Col xs={6} md={2}><Oscillator index="3"/></Col>
-		<Col xs={6} md={2}><Oscillator index="4"/></Col>
-		<Col xs={6} md={2}><Oscillator index="5"/></Col>
-	</Row>
-	</Grid>,
+	<div>
+		<Grid>
+		<Row className="show-grid">
+			<Col xs={6} md={2}><Oscillator index="0"/></Col>
+			<Col xs={6} md={2}><Oscillator index="1"/></Col>
+			<Col xs={6} md={2}><Oscillator index="2"/></Col>
+			<Col xs={6} md={2}><Oscillator index="3"/></Col>
+			<Col xs={6} md={2}><Oscillator index="4"/></Col>
+			<Col xs={6} md={2}><Oscillator index="5"/></Col>
+		</Row>
+		</Grid>	
+	</div>,
 	synths
 	);
+ReactDOM.render(<VisualiserComponent></VisualiserComponent>, visualiser);
 

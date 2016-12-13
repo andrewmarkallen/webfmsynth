@@ -6,12 +6,12 @@ class Oscillator
 	constructor()
 	{
 		this.test="Hello";
-		this.osc = 1;
-		this.gain = null;
+		this.osc = null;
 		this.gainMaster = null;
 		this.gainEnv = null;
 		this.parameter = {
 			freq:440,
+			gain:1,
 			a:0,
 			d:1,
 			s:1,
@@ -45,6 +45,7 @@ class Synth
 			r : 10
 		};
 
+		this.analyser = null;
 		this.context = null;
 		this.gainNode = null;
 		this.oscillator = null;
@@ -156,6 +157,7 @@ class Synth
 			//this.modOscillator = this.context.createOscillator();
 			this.gainNode = this.context.createGain();
 			this.filterNode = this.context.createBiquadFilter();
+			this.analyser = this.context.createAnalyser();
 
 			//Connect our nodes together
 			this.op[0].osc.connect(this.op[0].gainEnv);
@@ -166,8 +168,8 @@ class Synth
 			this.op[1].gainEnv.connect(this.op[1].gainMaster);
 			this.op[1].gainMaster.connect(this.filterNode);
 			this.filterNode.connect(this.gainNode);
-			this.gainNode.connect(this.context.destination);
-
+			this.gainNode.connect(this.analyser);
+			this.analyser.connect(this.context.destination);
 			this.op[0].osc.frequency.value = 300;
 			this.op[0].gainMaster.gain.value = 30;
 			this.op[0].osc.frequency.value = this.parameter.freq;
@@ -212,13 +214,18 @@ class Synth
 
 	changeOpParameter(i, param, value)
 	{
+		console.log("Parameter is: " + param + ", value: " + value);
 		this.op[i].parameter[param] = 1*value;
-		this.updateOpNodes(i)
+		console.log("entering updateOpNodes");
+		this.updateOpNodes(i);
+		console.log("out changeOpParameter");
 	};
 
 	updateOpNodes(i)
 	{
+		console.log("freq: " + this.op[i].parameter.freq);
 		this.op[i].osc.frequency.value = this.op[i].parameter.freq;
+		console.log("gain: " + this.op[i].parameter.gain);
 		this.op[i].gainMaster.gain.value = this.op[i].parameter.gain;
 	};
 
